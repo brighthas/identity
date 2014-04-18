@@ -1,0 +1,37 @@
+{
+  "name": "identity",
+  "version": "0.0.0",
+  "description": "identity ========",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brighthas/identity"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brighthas/identity/issues"
+  },
+  "homepage": "https://github.com/brighthas/identity",
+  "dependencies": {
+    "jsdm": "^0.4.5",
+    "validator": "^3.8.0",
+    "shortid": "^2.0.0",
+    "q": "^1.0.1",
+    "express": "^4.0.0",
+    "mongojs": "^0.11.1",
+    "nodemailer": "^0.6.2"
+  },
+  "devDependencies": {
+    "mocha": "^1.18.2",
+    "should": "^3.3.0",
+    "express-session": "^1.0.2",
+    "nedb": "^0.10.5",
+    "supertest": "^0.11.0",
+    "cookie-parser": "^1.0.1",
+    "body-parser": "^1.0.2"
+  }
+}
