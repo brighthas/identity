@@ -26,7 +26,6 @@ domain.on("User.*.create",function(data){
 
 domain.on("User.*.update",function(data){
     var id = data.id;
-    delete data.id;
     db.update({id:id},{ $set:data});
 })
 
