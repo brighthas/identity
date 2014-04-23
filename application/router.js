@@ -37,4 +37,6 @@ router.post("/:id/changePassword",
 router.post("/:id/findPassword",
     require("./handles/findPassword"))
 
+router.get("/refreshValidatNum")
+
 module.exports = router;
