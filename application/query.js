@@ -13,9 +13,13 @@ module.exports = {
 
     getUserByUsername: function (username) {
         var defer = Q.defer();
-        db.findOne({username: username}, function (err, user) {
-            defer.resolve(user);
-        })
+        if(username){
+            db.findOne({username: username}, function (err, user) {
+                defer.resolve(user);
+            })
+        }else{
+            defer.resolve();
+        }
         return defer.promise;
     },
 
