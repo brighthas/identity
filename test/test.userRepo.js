@@ -1,11 +1,19 @@
-var domain = require("./util/domain");
+var domain = require("../domain");
 var should = require("should");
 var crypto = require("crypto");
+var db = require("../application/db");
 
 describe("userRepo", function () {
 
     var userRepository = domain._my.repos.User;
     var user,data;
+
+
+    it("#clearDB", function (done) {
+        domain._my.repos.User.loopClear();
+        db.remove({}, done);
+
+    })
 
     it("#_create", function (done) {
 
@@ -33,11 +41,8 @@ describe("userRepo", function () {
     })
 
     it("#_data2aggre", function () {
-
         var u = userRepository._data2aggre(data);
         u.should.eql(user);
     })
-
-
 
 })

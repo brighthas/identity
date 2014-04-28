@@ -1,2 +1,3 @@
 var mongojs = require("mongojs");
-module.exports = mongojs("userdb",["users"]).users;
+var config = require("./config");
+module.exports = mongojs(config["mongo_url"],["users"]).users;

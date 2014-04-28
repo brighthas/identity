@@ -1,11 +1,41 @@
-var app = require("./util/application");
+var userCtrl = require("../application/controller/userCtrl");
 var request = require('supertest');
 var should = require("should");
+var domain = require("../domain");
 var crypto = require("crypto");
 
-describe("application", function () {
+var db = require("../application/db");
+
+var express = require('express');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var session = require("express-session");
+
+var app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(cookieParser("keyboard cat"));
+app.use(session());
+
+app.use('/users', userCtrl);
+
+app.use(function (err, req, res, next) {
+    if (err) {
+        console.log(err)
+        res.send("500");
+    }
+})
+
+describe("userCtrl", function () {
 
     var leoId;
+
+
+    it("#clearDB", function (done) {
+        domain._my.repos.User.loopClear();
+        db.remove({}, done);
+
+    })
 
     it("#/users/reg", function (done) {
         request(app)
@@ -54,33 +84,6 @@ describe("application", function () {
     })
 
 
-    var userId;
-
-    it("#/users/:id?", function (done) {
-
-        request(app)
-            .post("/users/login")
-            .send({username: "brighthas", password: "123456"})
-            .end(function (err, res) {
-
-                should.not.exist(res.body.error);
-                var cookie = res.headers['set-cookie'];
-
-                request(app).get("/users").set('cookie', cookie)
-                    .end(function (err, result) {
-                        result.body.length.should.eql(2);
-                        userId = result.body[0].id;
-                        request(app).get("/users/" + userId).set('cookie', cookie)
-                            .end(function (err, result) {
-                                result.body.id.should.eql(userId);
-                                done();
-                            })
-                    })
-
-            })
-
-    })
-
     it("#/users/:id/deactivate", function (done) {
 
 
@@ -93,12 +96,11 @@ describe("application", function () {
                 request(app).post("/users/" + leoId + "/deactivate").set("cookie", cookie).end(function (err, res) {
 
                     should.not.exist(res.body.error);
-                    request(app).get("/users/" + leoId).set("cookie", cookie).end(function (err, res) {
 
-                        res.body.activation.should.eql(false);
+                    domain.repos.User.get(leoId).then(function (u) {
+                        u.activation.should.eql(false);
                         done()
                     })
-
                 })
 
             });
@@ -115,9 +117,8 @@ describe("application", function () {
                 request(app).post("/users/" + leoId + "/activate").set("cookie", cookie).end(function (err, res) {
 
                     should.not.exist(res.body.error);
-                    request(app).get("/users/" + leoId).set("cookie", cookie).end(function (err, res) {
-
-                        res.body.activation.should.eql(true);
+                    domain.repos.User.get(leoId).then(function (u) {
+                        u.activation.should.eql(true);
                         done()
                     })
 
@@ -141,8 +142,8 @@ describe("application", function () {
                     .end(function (err, res) {
                         should.not.exist(res.body.error);
 
-                        request(app).get("/users/" + leoId).set("cookie", cookie).end(function (err, res) {
-                            res.body.username.should.eql("leoleoleo");
+                        domain.repos.User.get(leoId).then(function (u) {
+                            u.username.should.eql("leoleoleo");
                             done()
                         })
 
@@ -165,8 +166,8 @@ describe("application", function () {
 
                         should.not.exist(res.body.error);
 
-                        request(app).get("/users/" + leoId).set("cookie", cookie).end(function (err, res) {
-                            res.body.password.should.eql(crypto.createHash("md5").update("999666").digest("hex"));
+                        domain.repos.User.get(leoId).then(function (u) {
+                            u._password.should.eql(crypto.createHash("md5").update("999666").digest("hex"));
                             done()
                         })
 
@@ -174,24 +175,13 @@ describe("application", function () {
             });
     })
 
-    it("#/users/:id/changePassword", function (done) {
+    it("#/users/:id/findPassword", function (done) {
 
-        request(app)
-            .post("/users/login")
-            .send({username: "brighthas", password: "123456"})
+        request(app).post("/users/findPassword")
+            .send({email: "1405491181@qq.com"})
             .end(function (err, res) {
-
-                var cookie = res.headers['set-cookie'];
-                request(app).post("/users/" + userId + "/findPassword")
-                    .send({email:"1405491181@qq.com"})
-                    .set("cookie", cookie)
-                    .end(function (err, res) {
-
-                        //console.log(res.body);
-                        done();
-
-                    })
-            });
+                done();
+            })
     })
 
 

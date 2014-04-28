@@ -1,4 +1,4 @@
-var domain = require("./util/domain");
+var domain = require("../domain");
 var should = require("should");
 var crypto = require("crypto");
 
