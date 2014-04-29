@@ -15,13 +15,13 @@ var transport = nodemailer.createTransport("SMTP", {
     }
 });
 
-router.post("/login", function (req, res) {
+router.post("/login", function (req, res,next) {
+
     if (req.session.user) {
-        res.send({error: "您已登录，请不要重复登录。"});
+        next({username: "您已登录，请不要重复登录。"});
     } else {
         var username = req.body.username;
         var password = req.body.password;
-        var err = {error: {username: "登录账号或密码有误，请重新登录。"}};
 
         function handle(user) {
             if (user) {
@@ -29,10 +29,10 @@ router.post("/login", function (req, res) {
                     req.session.user = user;
                     res.send();
                 } else {
-                    res.send(err);
+                    next({username: "登录账号或密码有误，请重新登录。"});
                 }
             } else {
-                res.send(err);
+                next({username: "登录账号或密码有误，请重新登录。"});
             }
         }
 
@@ -43,7 +43,7 @@ router.post("/login", function (req, res) {
                 query.getUserByUsername(username).then(handle);
             }
         } else {
-            res.send(err);
+            next({username: "登录账号或密码有误，请重新登录。"});
         }
     }
 });
@@ -53,11 +53,10 @@ router.post("/logout", function (req, res) {
     res.send();
 })
 
-router.post("/reg", function (req, res) {
-
+router.post("/reg", function (req, res,next) {
     domain.repos.User.create(req.body, function (err, user) {
         if (err) {
-            res.send({error: "注册信息有误，请重新输入注册信息" + err.stack});
+            next({username:"注册信息有误，请重新输入注册信息"});
         } else {
             req.session.user = {
                 id: user.id,
@@ -67,6 +66,7 @@ router.post("/reg", function (req, res) {
             res.send({userId:user.id});
         }
     })
+
 });
 
 router.post("/:id/activate",function (req, res) {
@@ -79,34 +79,34 @@ router.post("/:id/deactivate",function (req, res) {
     res.send();
 });
 
-router.post("/:id/changeUsername",function (req, res) {
+router.post("/:id/changeUsername",function (req, res,next) {
     var uid = req.session.user.id;
     if (uid === req.params.id || req.session.user.email === "brighthas@gmail.com") {
         domain.call("User.changeUsername", req.params.id, [req.body.username]).then(function () {
             res.send();
         }).fail(function () {
-                res.send({error: "更改名称失败"});
+                next({username: "更改名称失败"});
             });
     } else {
-        res.send({error: "更改名称失败"});
+        next({error: "更改名称失败"});
     }
 });
 
 // {oldPassword , newPassword}
-router.post("/:id/changePassword",function (req, res) {
+router.post("/:id/changePassword",function (req, res,next) {
     var uid = req.session.user.id;
     if (uid === req.params.id || req.session.user.email === "brighthas@gmail.com") {
         domain.call("User.changePassword", req.params.id, [req.body.oldPassword, req.body.newPassword]).then(function () {
             res.send();
         }).fail(function (err) {
-                res.send({error: "更改密码失败"});
+                next({password: "更改密码失败"});
             });
     } else {
-        res.send({error: "更改密码失败"});
+        next({password: "更改密码失败"});
     }
 })
 
-router.post("/findPassword",function (req, res) {
+router.post("/findPassword",function (req, res,next) {
     query.getUserByEmail(req.body.email).then(function (user) {
         if (user) {
             transport.sendMail({
@@ -118,12 +118,12 @@ router.post("/findPassword",function (req, res) {
 
             }, function (err) {
                 if (err) {
-                    res.send({error: "内部错误，请联系管理员"});
+                    next({email: "内部错误，请联系管理员"});
                 } else
                     res.send();
             });
         } else {
-            res.send({error: "没有此用户"});
+            next({email: "没有此用户"});
         }
     })
 })

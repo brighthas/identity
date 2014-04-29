@@ -16,4 +16,6 @@ module.exports = function (conf) {
         query: require("./application/query")
     }
 
+    return result;
+
 }

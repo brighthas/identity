@@ -21,7 +21,6 @@ app.use('/users', userCtrl);
 
 app.use(function (err, req, res, next) {
     if (err) {
-        console.log(err)
         res.send("500");
     }
 })
@@ -42,13 +41,13 @@ describe("userCtrl", function () {
             .post("/users/reg")
             .send({username: "brighthas", email: "brighthas@gmail.com", password: "123456"})
             .end(function (err, res) {
-
-                should.not.exist(res.body.error);
+                res.text.should.not.eql("500");
                 request(app)
                     .post("/users/reg")
                     .send({username: "brighthas", email: "brighthas@gmail.com", password: "123456"})
                     .end(function (err, res) {
-                        should.exist(res.body.error);
+
+                        res.text.should.eql("500");
 
                         request(app)
                             .post("/users/reg")
@@ -71,7 +70,9 @@ describe("userCtrl", function () {
                     .post("/users/login")
                     .send({username: "brighthas2", password: "123456"})
                     .end(function (err, res) {
-                        should.exist(res.body.error);
+
+                        res.text.should.eql("500");
+
                         request(app)
                             .post("/users/login")
                             .send({username: "brighthas@gmail.com", password: "123456"})
