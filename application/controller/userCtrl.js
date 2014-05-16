@@ -27,6 +27,12 @@ router.post("/login", function (req, res,next) {
             if (user) {
                 if (user.password === crypto.createHash("md5").update(password).digest("hex")) {
                     req.session.user = user;
+                    res.cookie('user', JSON.stringify({
+                        username: user.username,
+                        password: user.password
+                    }), {
+                        maxAge: 1000 * 60 * 60 * 24 * 90
+                    });
                     res.send();
                 } else {
                     next({username: "登录账号或密码有误，请重新登录。"});
